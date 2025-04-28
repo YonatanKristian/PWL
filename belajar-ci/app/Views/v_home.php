@@ -1,4 +1,6 @@
-ini halaman home<br>
-<a href="/produk">ke halaman produk</a><br>
-<a href="/keranjang">ke halaman keranjang</a>
+<?= $this->extend('layout') ?>
+<?= $this->section('content') ?>
+<!-- Table with stripped rows -->
 
+<!-- End Table with stripped rows -->
+ <?= $this->endSection() ?>
