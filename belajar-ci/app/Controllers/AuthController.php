@@ -4,61 +4,42 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
+use App\Models\UserModel;
+
 class AuthController extends BaseController 
 {
-    public function __construct()
+    protected $user;
+    function __construct()
     {
         helper('form');
+        $this->user= new UserModel();
     }
-    public function login()
-    {
-        if ($this->request->getPost()) {
+   
+   public function login()
+{
+    if ($this->request->getPost()) {
+        $rules = [
+            'username' => 'required|min_length[6]',
+            'password' => 'required|min_length[7]|numeric',
+        ];
+
+        if ($this->validate($rules)) {
             $username = $this->request->getVar('username');
             $password = $this->request->getVar('password');
 
-           
-            $users = [
-                [
-                    'id' => 1,
-                    'username' => 'yonatan',
-                    'password' => password_hash('123', PASSWORD_DEFAULT), 
-                    'role' => 'admin'
-                ],
-                [
-                    'id' => 2,
-                    'username' => 'johndoe',
-                    'password' => password_hash('userpass', PASSWORD_DEFAULT), 
-                    'role' => 'user'
-                ]
-            ];
+            $dataUser = $this->user->where(['username' => $username])->first(); //pasw 1234567
 
-            
-            $dataUser = null;
-            foreach ($users as $user) {
-                if ($user['username'] == $username) {
-                    $dataUser = $user;
-                    break;
-                }
-            }
-
-            
             if ($dataUser) {
-                if (password_verify($password, $dataUser['password'])) { 
+                if (password_verify($password, $dataUser['password'])) {
                     session()->set([
-                        'id' => $dataUser['id'],
                         'username' => $dataUser['username'],
                         'role' => $dataUser['role'],
                         'isLoggedIn' => TRUE
                     ]);
 
-                    
-                    if ($dataUser['role'] == 'admin') {
-                        return redirect()->to(base_url('/admin/dashboard')); 
-                    }if ($dataUser['role'] == 'admin' || $dataUser['role'] == 'user') {
-                        return redirect()->to(base_url('/user/dashboard'));
-                    }
+                    return redirect()->to(base_url('/'));
                 } else {
-                    session()->setFlashdata('failed', 'Username & Password Salah');
+                    session()->setFlashdata('failed', 'Kombinasi Username & Password Salah');
                     return redirect()->back();
                 }
             } else {
@@ -66,9 +47,13 @@ class AuthController extends BaseController
                 return redirect()->back();
             }
         } else {
-            return view('v_login');
+            session()->setFlashdata('failed', $this->validator->listErrors());
+            return redirect()->back();
         }
     }
+
+    return view('v_login');
+}
     
     public function logout()
     {

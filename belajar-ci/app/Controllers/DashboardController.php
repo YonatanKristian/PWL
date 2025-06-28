@@ -36,6 +36,7 @@ class DashboardController extends BaseController
 
             return view('user_keranjang');
         }
+        
     public function produk()
         {
             
